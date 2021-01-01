@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: spring_web_server
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    platform: h2
+    driver-class-name: org.h2.Driver
+    url: "jdbc:h2:mem:spring_web_server;MODE=MYSQL;DB_CLOSE_DELAY=-1"
+    username: sa
+    password:
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+      pool-name: H2_DB
