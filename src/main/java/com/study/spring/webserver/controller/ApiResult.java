@@ -1,43 +1,54 @@
 package com.study.spring.webserver.controller;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.http.HttpStatus;
 
-/* API Response 공통 FORMAT */
 public class ApiResult<T> {
 
-  private final boolean isSuccess;
+  private final boolean success;
 
-  @JsonInclude(Include.NON_NULL)
-  private final  T response;
+  private final T response;
 
-  @JsonInclude(Include.NON_NULL)
-  private final ApiError errors;
+  private final ApiError error;
 
-  private ApiResult(boolean isSuccess, T response, ApiError error) {
-    this.isSuccess = isSuccess;
+  private ApiResult(boolean success, T response, ApiError error) {
+    this.success = success;
     this.response = response;
-    this.errors = error;
+    this.error = error;
   }
 
   public static <T> ApiResult<T> OK(T response) {
     return new ApiResult<>(true, response, null);
   }
 
-  public static ApiResult<?> ERROR(ErrorCode errorCode, HttpStatus status) {
-    return new ApiResult<>(false, null, new ApiError(errorCode, status) );
+  public static ApiResult<?> ERROR(Throwable throwable, HttpStatus status) {
+    return new ApiResult<>(false, null, new ApiError(throwable, status));
+  }
+
+  public static ApiResult<?> ERROR(String errorMessage, HttpStatus status) {
+    return new ApiResult<>(false, null, new ApiError(errorMessage, status));
   }
 
   public boolean isSuccess() {
-    return isSuccess;
+    return success;
+  }
+
+  public ApiError getError() {
+    return error;
   }
 
   public T getResponse() {
     return response;
   }
 
-  public ApiError getErrors() {
-    return errors;
+  @Override
+  public String toString() {
+    return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+      .append("success", success)
+      .append("response", response)
+      .append("error", error)
+      .toString();
   }
+
 }

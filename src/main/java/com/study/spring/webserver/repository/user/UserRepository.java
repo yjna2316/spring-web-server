@@ -1,6 +1,7 @@
 package com.study.spring.webserver.repository.user;
 
 import com.study.spring.webserver.model.commons.Id;
+import com.study.spring.webserver.model.user.ConnectedUser;
 import com.study.spring.webserver.model.user.Email;
 import com.study.spring.webserver.model.user.User;
 
@@ -23,6 +24,7 @@ public interface UserRepository {
 
   Optional<User> findByEmail(Email email);
 
-  List<User> findAll();
+  List<ConnectedUser> findAllConnectedUser(Id<User, Long> userId);
 
+  List<Id<User, Long>> findConnectedIds(Id<User, Long> userId);
 }

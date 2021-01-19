@@ -1,21 +1,27 @@
 package com.study.spring.webserver.model.user;
 
+import com.study.spring.webserver.security.Jwt;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.time.LocalDateTime.now;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public class User {
   private final Long seq;
 
   private final Email email;
+
+  private final String name;
 
   private String password;
 
@@ -25,24 +31,50 @@ public class User {
 
   private final LocalDateTime createAt;
 
-  public User(Email email, String password) {
-    this(null, email, password, 0, null, null);
+  // 생성자 체이닝 -> 생성자 하나로 사용하지 않고 파라미터 적은게 많은 걸 호출하도록 생성자 오버로딩 사용
+  public User(String name, Email email, String password) {
+    this(null, name, email, password, 0, null, null);
   }
 
-  public User(Long seq, Email email, String password, int loginCount, LocalDateTime lastLoginAt, LocalDateTime createAt) {
+  public User(Long seq, String name, Email email, String password, int loginCount, LocalDateTime lastLoginAt, LocalDateTime createAt) {
+    checkArgument(isNotEmpty(name), "name must be provided.");
+    checkArgument(
+      name.length() >= 1 && name.length() <= 10,
+      "name length must be between 1 and 10 characters."
+    );
     checkNotNull(email, "email must be provided.");
     checkNotNull(password, "password must be provided.");
 
     this.seq = seq;
+    this.name = name;
     this.email = email;
     this.password = password;
     this.loginCount = loginCount;
-    this.lastLoginAt = defaultIfNull(lastLoginAt, now());
+    this.lastLoginAt = lastLoginAt;
     this.createAt = defaultIfNull(createAt, now());
+  }
+
+  public void login(PasswordEncoder passwordEncoder, String credentials) {
+    if (!passwordEncoder.matches(credentials, password))
+      throw new IllegalArgumentException("Bad credential");
+  }
+
+  public void afterLoginSuccess() {
+    loginCount++;
+    lastLoginAt = now();
+  }
+
+  public String newApiToken(Jwt jwt, String[] roles) {
+    Jwt.Claims claims = Jwt.Claims.of(seq, name, email, roles);
+    return jwt.newToken(claims);
   }
 
   public Long getSeq() {
     return seq;
+  }
+
+  public String getName() {
+    return name;
   }
 
   public Email getEmail() {
@@ -57,6 +89,7 @@ public class User {
     return loginCount;
   }
 
+
   public Optional<LocalDateTime> getLastLoginAt() {
     return ofNullable(lastLoginAt);
   }
@@ -64,7 +97,6 @@ public class User {
   public LocalDateTime getCreateAt() {
     return createAt;
   }
-
 
   @Override
   public boolean equals(Object o) {
@@ -81,11 +113,20 @@ public class User {
 
   @Override
   public String toString() {
-    return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
+    return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+      .append("seq", seq)
+      .append("name", name)
+      .append("email", email)
+      .append("password", "[PROTECTED]")
+      .append("loginCount", loginCount)
+      .append("lastLoginAt", lastLoginAt)
+      .append("createAt", createAt)
+      .toString();
   }
 
   static public class Builder {
     private Long seq;
+    private String name;
     private Email email;
     private String password;
     private int loginCount;
@@ -97,6 +138,7 @@ public class User {
 
     public Builder(User user) {
       this.seq = user.seq;
+      this.name = user.name;
       this.email = user.email;
       this.password = user.password;
       this.loginCount = user.loginCount;
@@ -106,6 +148,11 @@ public class User {
 
     public Builder seq(Long seq) {
       this.seq = seq;
+      return this;
+    }
+
+    public Builder name(String name) {
+      this.name = name;
       return this;
     }
 
@@ -135,7 +182,7 @@ public class User {
     }
 
     public User build() {
-      return new User(seq, email, password, loginCount, lastLoginAt, createAt);
+      return new User(seq, name, email, password, loginCount, lastLoginAt, createAt);
     }
   }
 }

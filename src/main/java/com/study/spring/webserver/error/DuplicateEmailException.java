@@ -1,5 +1,5 @@
-package com.study.spring.webserver.error;
-
-public class DuplicateEmailException extends RuntimeException {
-}
-
+//package com.study.spring.webserver.error;
+//
+//public class DuplicateEmailException extends RuntimeException {
+//}
+//

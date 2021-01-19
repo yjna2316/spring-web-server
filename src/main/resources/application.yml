@@ -1,6 +1,10 @@
 spring:
   application:
     name: spring_web_server
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    cache-duration: PT1H
   h2:
     console:
       enabled: true
@@ -15,3 +19,11 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 5
       pool-name: H2_DB
+server:
+  port: 8080
+jwt:
+  token:
+    header: api_key
+    issuer: social_server
+    clientSecret: Rel3Bjce2MajBo09qgkNgYaTuzvJe8iwnBFhsDS5
+    expirySeconds: 0

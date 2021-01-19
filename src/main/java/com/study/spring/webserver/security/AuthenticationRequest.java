@@ -1,25 +1,18 @@
-package com.study.spring.webserver.controller.user;
+package com.study.spring.webserver.security;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class JoinRequest {
-
-  private String name;
-
+public class AuthenticationRequest {
   private String principal;
 
   private String credentials;
 
-  protected JoinRequest() {}
+  protected AuthenticationRequest() {}
 
-  public JoinRequest(String principal, String credentials) {
+  public AuthenticationRequest(String principal, String credentials) {
     this.principal = principal;
     this.credentials = credentials;
-  }
-
-  public String getName() {
-    return name;
   }
 
   public String getPrincipal() {
@@ -33,10 +26,8 @@ public class JoinRequest {
   @Override
   public String toString() {
     return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-      .append("name", name)
       .append("principal", principal)
       .append("credentials", credentials)
       .toString();
   }
-
 }

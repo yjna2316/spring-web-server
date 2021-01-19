@@ -1,6 +1,7 @@
 package com.study.spring.webserver.repository.user;
 
 import com.study.spring.webserver.model.commons.Id;
+import com.study.spring.webserver.model.user.ConnectedUser;
 import com.study.spring.webserver.model.user.Email;
 import com.study.spring.webserver.model.user.User;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,13 +36,13 @@ public class JdbcUserRepository implements UserRepository {
   public User insert(User user) {
     KeyHolder keyHolder = new GeneratedKeyHolder();
     jdbcTemplate.update(conn -> {
-      // TODO 이름 프로퍼티 처리
-      PreparedStatement ps = conn.prepareStatement("INSERT INTO users(seq,email,passwd,login_count,last_login_at,create_at) VALUES (null,?,?,?,?,?)", new String[]{"seq"});
-      ps.setString(1, user.getEmail().getAddress());
-      ps.setString(2, user.getPassword());
-      ps.setInt(3, user.getLoginCount());
-      ps.setTimestamp(4, timestampOf(user.getLastLoginAt().orElse(null)));
-      ps.setTimestamp(5, timestampOf(user.getCreateAt()));
+      PreparedStatement ps = conn.prepareStatement("INSERT INTO users(seq,name, email,passwd,login_count,last_login_at,create_at) VALUES (null,?,?,?,?,?,?)", new String[]{"seq"});
+      ps.setString(1, user.getName());
+      ps.setString(2, user.getEmail().getAddress());
+      ps.setString(3, user.getPassword());
+      ps.setInt(4, user.getLoginCount());
+      ps.setTimestamp(5, timestampOf(user.getLastLoginAt().orElse(null)));
+      ps.setTimestamp(6, timestampOf(user.getCreateAt()));
       return ps;
     }, keyHolder);
 
@@ -54,18 +55,13 @@ public class JdbcUserRepository implements UserRepository {
 
   @Override
   public void update(User user) {
-    // TODO 이름 프로퍼티 처리
-    jdbcTemplate.update("UPDATE users SET passwd=?,login_count=?,last_login_at=? WHERE seq=?",
+    jdbcTemplate.update("UPDATE users SET name=?,passwd=?,login_count=?,last_login_at=? WHERE seq=?",
+      user.getName(),
       user.getPassword(),
       user.getLoginCount(),
       user.getLastLoginAt().orElse(null),
       user.getSeq()
     );
-  }
-
-  @Override
-  public List<User> findAll() {
-    return jdbcTemplate.query("SELECT * FROM users", mapper);
   }
 
   @Override
@@ -88,10 +84,33 @@ public class JdbcUserRepository implements UserRepository {
     return user.stream().findAny();
   }
 
-  // static은 언제 사용할까? // 왜 static으로 해도 될까?
+  @Override
+  public List<ConnectedUser> findAllConnectedUser(Id<User, Long> userId) {
+    return jdbcTemplate.query(
+      "SELECT u.seq,u.name,u.email,c.granted_at FROM connections c JOIN users u ON c.target_seq=u.seq WHERE c.user_seq=? AND c.granted_at is not null ORDER BY seq DESC",
+      new Object[]{userId.value()},
+      (rs, rowNum) -> new ConnectedUser(
+        rs.getLong("seq"),
+        rs.getString("name"),
+        new Email(rs.getString("email")),
+        dateTimeOf(rs.getTimestamp("granted_at"))
+      )
+    );
+  }
+
+  @Override
+  public List<Id<User, Long>> findConnectedIds(Id<User, Long> userId) {
+    return jdbcTemplate.query(
+      "SELECT target_seq FROM connections WHERE user_seq=? AND granted_at is not null ORDER BY target_seq",
+      new Object[]{userId.value()},
+      (rs, rowNum) -> Id.of(User.class, rs.getLong("target_seq"))
+    );
+  }
+
   /* DB에서 읽어온 결과(ResultSet)를 객체로 변환시켜주는 메소드 */
   static RowMapper<User> mapper = (rs, rowNum) -> new User.Builder()
     .seq(rs.getLong("seq"))
+    .name(rs.getString("name"))
     .email(new Email(rs.getString("email")))
     .password(rs.getString("passwd"))
     .loginCount(rs.getInt("login_count"))
