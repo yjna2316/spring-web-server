@@ -1,6 +1,7 @@
 package com.study.spring.webserver.controller.post;
 
 import com.study.spring.webserver.model.commons.Id;
+import com.study.spring.webserver.model.post.Comment;
 import com.study.spring.webserver.model.post.Post;
 import com.study.spring.webserver.model.post.Writer;
 import com.study.spring.webserver.model.user.User;
@@ -8,19 +9,19 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class PostingRequest {
+public class CommentRequest {
 
   @ApiModelProperty(value = "내용", required = true)
   private String contents;
 
-  protected PostingRequest() {}
+  protected CommentRequest() {}
 
   public String getContents() {
     return contents;
   }
 
-  public Post newPost(Id<User, Long> userId, Writer writer) {
-    return new Post(userId, writer, contents);
+  public Comment newComment(Id<User, Long> userId, Id<Post, Long> postId, Writer writer) {
+    return new Comment(userId, postId, writer, contents);
   }
 
   @Override

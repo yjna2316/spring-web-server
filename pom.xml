@@ -21,6 +21,7 @@
         <undertow.version>2.2.2.Final</undertow.version>
         <springfox.swagger2.version>2.9.2</springfox.swagger2.version>
         <java.jwt.version>3.11.0</java.jwt.version>
+        <aws.sdk.version>1.11.906</aws.sdk.version>
         <guava.version>30.0-jre</guava.version>
         <h2.version>1.4.199</h2.version>
         <log4jdbc.version>0.2.7</log4jdbc.version>
@@ -101,6 +102,12 @@
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
             <version>${springfox.swagger2.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>${aws.sdk.version}</version>
         </dependency>
 
         <dependency>

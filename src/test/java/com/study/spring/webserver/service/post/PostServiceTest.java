@@ -57,7 +57,7 @@ class PostServiceTest {
   @Test
   @Order(2)
   void 포스트를_수정한다() {
-    Post post = postService.findById(userId, postId, writerId).orElse(null);
+    Post post = postService.findById(postId, writerId, userId).orElse(null);
     assertThat(post, is(notNullValue()));
     String contents = randomAlphabetic(40);
     post.modify(contents);
@@ -79,13 +79,13 @@ class PostServiceTest {
   void 포스트를_처음으로_좋아요_한다() {
     Post post;
 
-    post = postService.findById(userId, postId, writerId).orElse(null);
+    post = postService.findById(postId, writerId, userId).orElse(null);
     assertThat(post, is(notNullValue()));
     assertThat(post.isLikesOfMe(), is(false));
 
     int beforeLikes = post.getLikes();
 
-    post = postService.like(userId, postId, writerId).orElse(null);
+    post = postService.like(postId, writerId, userId).orElse(null);
     assertThat(post, is(notNullValue()));
     assertThat(post.isLikesOfMe(), is(true));
     assertThat(post.getLikes(), is(beforeLikes + 1));
@@ -96,13 +96,13 @@ class PostServiceTest {
   void 포스트를_중복으로_좋아할수없다() {
     Post post;
 
-    post = postService.findById(userId, postId, writerId).orElse(null);
+    post = postService.findById(postId, writerId, userId).orElse(null);
     assertThat(post, is(notNullValue()));
     assertThat(post.isLikesOfMe(), is(true));
 
     int beforeLikes = post.getLikes();
 
-    post = postService.like(userId, postId, writerId).orElse(null);
+    post = postService.like(postId, writerId, userId).orElse(null);
     assertThat(post, is(notNullValue()));
     assertThat(post.isLikesOfMe(), is(true));
     assertThat(post.getLikes(), is(beforeLikes));

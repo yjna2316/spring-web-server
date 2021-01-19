@@ -26,6 +26,8 @@ public class User {
 
   private String password;
 
+  private String profileImageUrl;
+
   private int loginCount;
 
   private LocalDateTime lastLoginAt;
@@ -34,10 +36,10 @@ public class User {
 
   // 생성자 체이닝 -> 생성자 하나로 사용하지 않고 파라미터 적은게 많은 걸 호출하도록 생성자 오버로딩 사용
   public User(String name, Email email, String password) {
-    this(null, name, email, password, 0, null, null);
+    this(null, name, email, password, null, 0, null, null);
   }
 
-  public User(Long seq, String name, Email email, String password, int loginCount, LocalDateTime lastLoginAt, LocalDateTime createAt) {
+  public User(Long seq, String name, Email email, String password, String profileImageUrl, int loginCount, LocalDateTime lastLoginAt, LocalDateTime createAt) {
     checkArgument(isNotEmpty(name), "name must be provided.");
     checkArgument(
       name.length() >= 1 && name.length() <= 10,
@@ -50,6 +52,7 @@ public class User {
     this.name = name;
     this.email = email;
     this.password = password;
+    this.profileImageUrl = profileImageUrl;
     this.loginCount = loginCount;
     this.lastLoginAt = lastLoginAt;
     this.createAt = defaultIfNull(createAt, now());
@@ -70,6 +73,17 @@ public class User {
     return jwt.newToken(claims);
   }
 
+
+  public void updateProfileImage(String profileImageUrl) {
+    checkArgument(isNotEmpty(profileImageUrl), "profileImageUrl must be provided.");
+    checkArgument(
+      profileImageUrl == null || profileImageUrl.length() <= 255,
+      "profileImageUrl length must be less than 255 characters."
+    );
+
+    this.profileImageUrl = profileImageUrl;
+  }
+
   public Long getSeq() {
     return seq;
   }
@@ -86,10 +100,13 @@ public class User {
     return password;
   }
 
+  public Optional<String> getProfileImageUrl() {
+    return ofNullable(profileImageUrl);
+  }
+
   public int getLoginCount() {
     return loginCount;
   }
-
 
   public Optional<LocalDateTime> getLastLoginAt() {
     return ofNullable(lastLoginAt);
@@ -119,6 +136,7 @@ public class User {
       .append("name", name)
       .append("email", email)
       .append("password", "[PROTECTED]")
+      .append("profileImageUrl", profileImageUrl)
       .append("loginCount", loginCount)
       .append("lastLoginAt", lastLoginAt)
       .append("createAt", createAt)
@@ -130,6 +148,7 @@ public class User {
     private String name;
     private Email email;
     private String password;
+    private String profileImageUrl;
     private int loginCount;
     private LocalDateTime lastLoginAt;
     private LocalDateTime createAt;
@@ -142,6 +161,7 @@ public class User {
       this.name = user.name;
       this.email = user.email;
       this.password = user.password;
+      this.profileImageUrl = user.profileImageUrl;
       this.loginCount = user.loginCount;
       this.lastLoginAt = user.lastLoginAt;
       this.createAt = user.createAt;
@@ -167,6 +187,11 @@ public class User {
       return this;
     }
 
+    public Builder profileImageUrl(String profileImageUrl) {
+      this.profileImageUrl = profileImageUrl;
+      return this;
+    }
+
     public Builder loginCount(int loginCount) {
       this.loginCount = loginCount;
       return this;
@@ -183,7 +208,8 @@ public class User {
     }
 
     public User build() {
-      return new User(seq, name, email, password, loginCount, lastLoginAt, createAt);
+      return new User(seq, name, email, password, profileImageUrl, loginCount, lastLoginAt, createAt);
     }
   }
+
 }

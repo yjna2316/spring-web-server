@@ -1,8 +1,7 @@
 package com.study.spring.webserver.controller.post;
 
-import com.study.spring.webserver.model.post.Post;
+import com.study.spring.webserver.model.post.Comment;
 import com.study.spring.webserver.model.post.Writer;
-import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -10,33 +9,21 @@ import java.time.LocalDateTime;
 
 import static org.springframework.beans.BeanUtils.copyProperties;
 
-public class PostDto {
+public class CommentDto {
 
-  @ApiModelProperty(value = "PK", required = true)
   private Long seq;
 
-  @ApiModelProperty(value = "내용", required = true)
   private String contents;
 
-  @ApiModelProperty(value = "좋아요 횟수", required = true)
-  private int likes;
-
-  @ApiModelProperty(value = "나의 좋아요 여부", required = true)
-  private boolean likesOfMe;
-
-  @ApiModelProperty(value = "댓글 갯수", required = true)
-  private int comments;
-
-  @ApiModelProperty(value = "작성자")
   private Writer writer;
 
-  @ApiModelProperty(value = "작성일시", required = true)
   private LocalDateTime createAt;
 
-  public PostDto(Post source) {
+  public CommentDto(Comment source) {
     copyProperties(source, this);
 
     this.writer = source.getWriter().orElse(null);
+
   }
 
   public Long getSeq() {
@@ -53,30 +40,6 @@ public class PostDto {
 
   public void setContents(String contents) {
     this.contents = contents;
-  }
-
-  public int getLikes() {
-    return likes;
-  }
-
-  public void setLikes(int likes) {
-    this.likes = likes;
-  }
-
-  public boolean isLikesOfMe() {
-    return likesOfMe;
-  }
-
-  public void setLikesOfMe(boolean likesOfMe) {
-    this.likesOfMe = likesOfMe;
-  }
-
-  public int getComments() {
-    return comments;
-  }
-
-  public void setComments(int comments) {
-    this.comments = comments;
   }
 
   public Writer getWriter() {
@@ -100,9 +63,6 @@ public class PostDto {
     return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
       .append("seq", seq)
       .append("contents", contents)
-      .append("likes", likes)
-      .append("likesOfMe", likesOfMe)
-      .append("comments", comments)
       .append("writer", writer)
       .append("createAt", createAt)
       .toString();

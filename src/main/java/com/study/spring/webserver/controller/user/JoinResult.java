@@ -1,5 +1,7 @@
 package com.study.spring.webserver.controller.user;
 
+import com.study.spring.webserver.model.user.User;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -7,11 +9,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class JoinResult {
 
+  @ApiModelProperty(value = "API 토큰", required = true)
   private final String apiToken;
 
-  private final UserDto user;
+  @ApiModelProperty(value = "사용자 정보", required = true)
+  private final User user;
 
-  public JoinResult(String apiToken, UserDto user) {
+  public JoinResult(String apiToken, User user) {
     checkNotNull(apiToken, "apiToken must be provided.");
     checkNotNull(user, "user must be provided.");
 
@@ -23,7 +27,7 @@ public class JoinResult {
     return apiToken;
   }
 
-  public UserDto getUser() {
+  public User getUser() {
     return user;
   }
 

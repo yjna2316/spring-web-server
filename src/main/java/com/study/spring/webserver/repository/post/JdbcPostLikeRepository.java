@@ -1,6 +1,9 @@
 package com.study.spring.webserver.repository.post;
 
+import com.study.spring.webserver.model.commons.Id;
+import com.study.spring.webserver.model.post.Post;
 import com.study.spring.webserver.model.post.PostLike;
+import com.study.spring.webserver.model.user.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -20,20 +23,13 @@ public class JdbcPostLikeRepository implements PostLikeRepository {
   }
 
   @Override
-  public PostLike insert(PostLike postLike) {
-    KeyHolder keyHolder = new GeneratedKeyHolder();
+  public void insert(Id<User, Long> userId, Id<Post, Long> postId) {
     jdbcTemplate.update(conn -> {
-      PreparedStatement ps = conn.prepareStatement("INSERT INTO likes(seq,user_seq,post_seq,create_at) VALUES (null,?,?,?)", new String[]{"seq"});
-      ps.setLong(1, postLike.getUserId().value());
-      ps.setLong(2, postLike.getPostId().value());
-      ps.setTimestamp(3, timestampOf(postLike.getCreateAt()));
+      PreparedStatement ps = conn.prepareStatement("INSERT INTO likes(seq,user_seq,post_seq) VALUES (null,?,?)");
+      ps.setLong(1, userId.value());
+      ps.setLong(2, postId.value());
       return ps;
-    }, keyHolder);
-
-    Number key = keyHolder.getKey();
-    long generatedSeq = key != null ? key.longValue() : -1;
-    return new PostLike.Builder(postLike)
-      .seq(generatedSeq)
-      .build();
+    });
   }
+
 }

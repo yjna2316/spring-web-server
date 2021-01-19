@@ -58,15 +58,16 @@ public class JdbcPostRepository implements PostRepository {
       post.getSeq()
     );
   }
-
   @Override
-  public Optional<Post> findById(Id<User, Long> loginUserId, Id<Post, Long> postId, Id<User, Long> userId) {
+  public Optional<Post> findById(Id<Post, Long> postId, Id<User, Long> writerId, Id<User, Long> userId) {
     List<Post> results = jdbcTemplate.query(
-      "SELECT p.*,u.email,u.name, EXISTS(SELECT true FROM LIKES WHERE LIKES.user_seq=? and LIKES.post_seq=?) as likesOfMe " +
-        "FROM posts p " +
-        "JOIN users u ON p.user_seq=u.seq " +
-        "WHERE p.seq=? AND p.user_seq=?",
-      new Object[]{ loginUserId.value(), postId.value(), postId.value(), userId.value() },
+      "SELECT " +
+        "p.*,u.email,u.name,ifnull(l.seq,false) as likesOfMe " +
+        "FROM " +
+        "posts p JOIN users u ON p.user_seq=u.seq LEFT OUTER JOIN likes l ON p.seq=l.post_seq AND l.user_seq=? " +
+        "WHERE " +
+        "p.seq=? AND p.user_seq=?",
+      new Object[]{userId.value(), postId.value(), writerId.value()},
       mapper
     );
     return ofNullable(results.isEmpty() ? null : results.get(0));

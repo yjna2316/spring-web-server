@@ -19,13 +19,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Service
 public class PostService {
 
-  private final UserRepository userRepository;
-
   private final PostRepository postRepository;
+
   private final PostLikeRepository postLikeRepository;
 
-  public PostService(UserRepository userRepository, PostRepository postRepository, PostLikeRepository postLikeRepository) {
-    this.userRepository = userRepository;
+  public PostService(PostRepository postRepository, PostLikeRepository postLikeRepository) {
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
   }
@@ -42,39 +40,36 @@ public class PostService {
   }
 
   @Transactional
-  public Optional<Post> like(Id<User, Long> userId, Id<Post, Long> postId, Id<User, Long> writerId) {
-    return findById(userId, postId, writerId).map(post -> {
+  public Optional<Post> like(Id<Post, Long> postId, Id<User, Long> writerId, Id<User, Long> userId) {
+    return findById(postId, writerId, userId).map(post -> {
       if (!post.isLikesOfMe()) {
         post.incrementAndGetLikes();
+        postLikeRepository.insert(userId, postId);
         update(post);
-        postLikeRepository.insert(new PostLike(userId, postId));
       }
       return post;
     });
   }
 
   @Transactional(readOnly = true)
-  public Optional<Post> findById(Id<User, Long> userId, Id<Post, Long> postId, Id<User, Long> writerId) {
-    checkNotNull(postId, "postId must be provided.");
+  public Optional<Post> findById(Id<Post, Long> postId, Id<User, Long> writerId, Id<User, Long> userId) {
     checkNotNull(writerId, "writerId must be provided.");
-    {
-      return postRepository.findById(userId, postId, writerId);
-    }
+    checkNotNull(postId, "postId must be provided.");
+    checkNotNull(userId, "userId must be provided.");
+
+    return postRepository.findById(postId, writerId, userId);
   }
 
   @Transactional(readOnly = true)
-  public List<Post> findAll(Id<User, Long> userId, Id<User, Long> writerId, long offset, int limit) {
-    checkNotNull(userId, "userId must be provided.");
+  public List<Post> findAll(Id<User, Long> writerId, Id<User, Long> userId, long offset, int limit) {
     checkNotNull(writerId, "writerId must be provided.");
+    checkNotNull(userId, "userId must be provided.");
     if (offset < 0)
       offset = 0;
     if (limit < 1 || limit > 5)
       limit = 5;
 
-    userRepository.findById(writerId)
-      .orElseThrow(() -> new NotFoundException(User.class, writerId));
-
-    return postRepository.findAll(userId, writerId, offset, limit);
+    return postRepository.findAll(writerId, userId, offset, limit);
   }
 
   private Post insert(Post post) {

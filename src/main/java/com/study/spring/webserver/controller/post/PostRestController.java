@@ -8,6 +8,7 @@ import com.study.spring.webserver.model.post.Post;
 import com.study.spring.webserver.model.post.Writer;
 import com.study.spring.webserver.model.user.User;
 import com.study.spring.webserver.security.JwtAuthentication;
+import com.study.spring.webserver.service.post.CommentService;
 import com.study.spring.webserver.service.post.PostService;
 import io.swagger.annotations.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,8 +26,11 @@ public class PostRestController {
 
   private final PostService postService;
 
-  public PostRestController(PostService postService) {
+  private final CommentService commentService;
+
+  public PostRestController(PostService postService, CommentService commentService) {
     this.postService = postService;
+    this.commentService = commentService;
   }
 
   /**
@@ -55,26 +59,12 @@ public class PostRestController {
   @GetMapping(path = "user/{userId}/post/list")
   @ApiOperation(value = "포스트 목록 조회")
   @ApiImplicitParams({
-    @ApiImplicitParam(
-      name = "offset",
-      dataType = "long",
-      paramType = "query",
-      defaultValue = "0",
-      value = "페이징 offset"
-    ),
-    @ApiImplicitParam(
-      name = "limit",
-      dataType = "integer",
-      paramType = "query",
-      defaultValue = "5",
-      value = "최대 조회 갯수"
-    )
+    @ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", defaultValue = "0", value = "페이징 offset"),
+    @ApiImplicitParam(name = "limit", dataType = "integer", paramType = "query", defaultValue = "20", value = "최대 조회 갯수")
   })
   public ApiResult<List<PostDto>> posts(
     @AuthenticationPrincipal JwtAuthentication authentication,
-    @PathVariable
-    @ApiParam(value = "조회대상자 PK (본인 또는 친구)", example = "1")
-      Long userId,
+    @PathVariable @ApiParam(value = "조회대상자 PK (본인 또는 친구)", example = "1") Long userId,
     PageRequest pageable
   ) {
     /**
@@ -103,9 +93,44 @@ public class PostRestController {
   ) {
     // 유저가 포스트 좋아요를 눌렀다. 포스트가 본인 것일 수도 있고, 친구의 것일 수도 있다.
     return OK(
-      postService.like(authentication.id, Id.of(Post.class, postId), Id.of(User.class, userId))
+      postService.like(Id.of(Post.class, postId), Id.of(User.class, userId), authentication.id)
         .map(PostDto::new)
         .orElseThrow(() -> new NotFoundException(Post.class, Id.of(Post.class, postId), Id.of(User.class, userId)))
+    );
+  }
+
+  @PostMapping(path = "user/{userId}/post/{postId}/comment")
+  public ApiResult<CommentDto> comment(
+    @AuthenticationPrincipal JwtAuthentication authentication,
+    @PathVariable @ApiParam(value = "조회 대상자 PK (본인 또는 친구)", example = "1") Long userId,
+    @PathVariable @ApiParam(value = "대상 포스트 PK", example = "1") Long postId,
+    @RequestBody CommentRequest request
+  ) {
+    return OK(
+      new CommentDto(
+        commentService.write(
+          Id.of(Post.class, postId),
+          Id.of(User.class, userId),
+          authentication.id,
+          request.newComment(
+            authentication.id, Id.of(Post.class, postId),
+            new Writer(authentication.email, authentication.name)
+          )
+        )
+      )
+    );
+  }
+
+  @GetMapping(path = "user/{userId}/post/{postId}/comment/list")
+  public ApiResult<List<CommentDto>> comments(
+    @AuthenticationPrincipal JwtAuthentication authentication,
+    @PathVariable @ApiParam(value = "조회대상자 PK (본인 또는 친구)", example = "1") Long userId,
+    @PathVariable @ApiParam(value = "대상 포스트 PK", example = "1") Long postId
+  ) {
+    return OK(
+      commentService.findAll(Id.of(Post.class, postId), Id.of(User.class, userId), authentication.id).stream()
+        .map(CommentDto::new)
+        .collect(toList())
     );
   }
 }

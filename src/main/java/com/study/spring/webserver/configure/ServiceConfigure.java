@@ -1,5 +1,10 @@
 package com.study.spring.webserver.configure;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -8,6 +13,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.study.spring.webserver.aws.S3Client;
 import com.study.spring.webserver.security.Jwt;
 import com.study.spring.webserver.util.MessageUtils;
 import com.zaxxer.hikari.HikariDataSource;
@@ -54,8 +60,26 @@ public class ServiceConfigure {
   }
 
   @Bean
+  public AmazonS3 amazonS3Client(AwsConfigure awsConfigure) {
+    return AmazonS3ClientBuilder.standard()
+      .withRegion(Regions.fromName(awsConfigure.getRegion()))
+      .withCredentials(
+        new AWSStaticCredentialsProvider(
+          new BasicAWSCredentials(
+            awsConfigure.getAccessKey(),
+            awsConfigure.getSecretKey())
+        )
+      )
+      .build();
+  }
+
+  @Bean
+  public S3Client s3Client(AmazonS3 amazonS3, AwsConfigure awsConfigure) {
+    return new S3Client(amazonS3, awsConfigure.getUrl(), awsConfigure.getBucketName());
+  }
+
+  @Bean
   public Jackson2ObjectMapperBuilder configureObjectMapper() {
-    AfterburnerModule abm = new AfterburnerModule();
     // Java time module
     JavaTimeModule jtm = new JavaTimeModule();
     jtm.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
@@ -70,7 +94,7 @@ public class ServiceConfigure {
     };
     builder.serializationInclusion(JsonInclude.Include.NON_NULL);
     builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    builder.modulesToInstall(abm, jtm);
+    builder.modulesToInstall(jtm);
     return builder;
   }
 

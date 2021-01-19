@@ -53,6 +53,15 @@ public class UserService {
     return user;
   }
 
+  @Transactional
+  public User updateProfileImage(Id<User, Long> userId, String profileImageUrl) {
+    User user = findById(userId)
+      .orElseThrow(() -> new NotFoundException(User.class, userId));
+    user.updateProfileImage(profileImageUrl);
+    update(user);
+    return user;
+  }
+
   @Transactional(readOnly = true)
   public Optional<User> findById(Id<User, Long> userId) {
     checkNotNull(userId, "userId must be provided.");
@@ -88,4 +97,5 @@ public class UserService {
   private void update(User user) {
     userRepository.update(user);
   }
+
 }

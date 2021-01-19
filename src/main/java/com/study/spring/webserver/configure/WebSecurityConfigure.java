@@ -115,7 +115,7 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
     List<AccessDecisionVoter<?>> decisionVoters = new ArrayList<>();
     decisionVoters.add(new WebExpressionVoter());
     decisionVoters.add(connectionBasedVoter());
-    // 모든 voter가 승인해야 리소스 접근이 가능한 정책의 accessDecisionManager 선택
+    //  모든 voter가 승인해야 해야 리소스 접근이 가능하다
     return new UnanimousBased(decisionVoters);
   }
 

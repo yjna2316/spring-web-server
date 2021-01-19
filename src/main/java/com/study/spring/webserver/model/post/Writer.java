@@ -1,6 +1,7 @@
 package com.study.spring.webserver.model.post;
 
 import com.study.spring.webserver.model.user.Email;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -11,8 +12,10 @@ import static java.util.Optional.ofNullable;
 
 public class Writer {
 
+  @ApiModelProperty(value = "이메일", required = true)
   private final Email email;
 
+  @ApiModelProperty(value = "이름")
   private final String name;
 
   public Writer(Email email) {
