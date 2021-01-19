@@ -2,6 +2,7 @@ package com.study.spring.webserver.controller.post;
 
 import com.study.spring.webserver.model.post.Post;
 import com.study.spring.webserver.model.post.Writer;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -11,18 +12,25 @@ import static org.springframework.beans.BeanUtils.copyProperties;
 
 public class PostDto {
 
+  @ApiModelProperty(value = "PK", required = true)
   private Long seq;
 
+  @ApiModelProperty(value = "포스트 내용", required = true)
   private String contents;
 
+  @ApiModelProperty(value = "좋아요 수", required = true)
   private int likes;
 
+  @ApiModelProperty(value = "좋아요 누른 포스트인지 여부", required = true)
   private boolean likesOfMe;
 
+  @ApiModelProperty(value = "댓글 수", required = true)
   private int comments;
 
+  @ApiModelProperty(value = "작성자", required = true)
   private Writer writer;
 
+  @ApiModelProperty(value = "생성일시", required = true)
   private LocalDateTime createAt;
 
   public PostDto(Post source) {
@@ -99,5 +107,4 @@ public class PostDto {
       .append("createAt", createAt)
       .toString();
   }
-
 }

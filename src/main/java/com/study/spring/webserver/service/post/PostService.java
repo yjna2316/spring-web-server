@@ -3,7 +3,9 @@ package com.study.spring.webserver.service.post;
 import com.study.spring.webserver.error.NotFoundException;
 import com.study.spring.webserver.model.commons.Id;
 import com.study.spring.webserver.model.post.Post;
+import com.study.spring.webserver.model.post.PostLike;
 import com.study.spring.webserver.model.user.User;
+import com.study.spring.webserver.repository.post.PostLikeRepository;
 import com.study.spring.webserver.repository.post.PostRepository;
 import com.study.spring.webserver.repository.user.UserRepository;
 import org.springframework.stereotype.Service;
@@ -20,10 +22,12 @@ public class PostService {
   private final UserRepository userRepository;
 
   private final PostRepository postRepository;
+  private final PostLikeRepository postLikeRepository;
 
-  public PostService(UserRepository userRepository, PostRepository postRepository) {
+  public PostService(UserRepository userRepository, PostRepository postRepository, PostLikeRepository postLikeRepository) {
     this.userRepository = userRepository;
     this.postRepository = postRepository;
+    this.postLikeRepository = postLikeRepository;
   }
 
   @Transactional
@@ -37,20 +41,40 @@ public class PostService {
     return post;
   }
 
-  @Transactional(readOnly = true)
-  public Optional<Post> findById(Id<Post, Long> postId) {
-    checkNotNull(postId, "postId must be provided.");
-
-    return postRepository.findById(postId);
+  @Transactional
+  public Optional<Post> like(Id<User, Long> userId, Id<Post, Long> postId, Id<User, Long> writerId) {
+    return findById(userId, postId, writerId).map(post -> {
+      if (!post.isLikesOfMe()) {
+        post.incrementAndGetLikes();
+        update(post);
+        postLikeRepository.insert(new PostLike(userId, postId));
+      }
+      return post;
+    });
   }
 
   @Transactional(readOnly = true)
-  public List<Post> findAll(Id<User, Long> userId) {
-    checkNotNull(userId, "userId must be provided.");
+  public Optional<Post> findById(Id<User, Long> userId, Id<Post, Long> postId, Id<User, Long> writerId) {
+    checkNotNull(postId, "postId must be provided.");
+    checkNotNull(writerId, "writerId must be provided.");
+    {
+      return postRepository.findById(userId, postId, writerId);
+    }
+  }
 
-    userRepository.findById(userId)
-      .orElseThrow(() -> new NotFoundException(User.class, userId));
-    return postRepository.findAll(userId);
+  @Transactional(readOnly = true)
+  public List<Post> findAll(Id<User, Long> userId, Id<User, Long> writerId, long offset, int limit) {
+    checkNotNull(userId, "userId must be provided.");
+    checkNotNull(writerId, "writerId must be provided.");
+    if (offset < 0)
+      offset = 0;
+    if (limit < 1 || limit > 5)
+      limit = 5;
+
+    userRepository.findById(writerId)
+      .orElseThrow(() -> new NotFoundException(User.class, writerId));
+
+    return postRepository.findAll(userId, writerId, offset, limit);
   }
 
   private Post insert(Post post) {

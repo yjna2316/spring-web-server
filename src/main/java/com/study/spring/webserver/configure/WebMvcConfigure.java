@@ -1,15 +1,33 @@
 package com.study.spring.webserver.configure;
 
+import com.study.spring.webserver.configure.support.PageRequest;
+import com.study.spring.webserver.configure.support.PageableArgumentResolver;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
+
+import java.util.List;
 
 @Configuration
 public class WebMvcConfigure implements WebMvcConfigurer {
 
   private final String baseApiPath = "api";
+
+  @Bean
+  public PageableArgumentResolver pageableArgumentResolver() {
+    PageableArgumentResolver resolver = new PageableArgumentResolver();
+    resolver.setFallbackPageable(new PageRequest());
+    return resolver;
+  }
+
+  @Override
+  public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+    argumentResolvers.add(new PageableArgumentResolver());
+  }
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -32,5 +50,4 @@ public class WebMvcConfigure implements WebMvcConfigurer {
         }
       });
   }
-
 }

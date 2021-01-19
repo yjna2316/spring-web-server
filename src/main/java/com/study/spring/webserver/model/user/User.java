@@ -17,11 +17,12 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public class User {
+
   private final Long seq;
 
-  private final Email email;
-
   private final String name;
+
+  private final Email email;
 
   private String password;
 

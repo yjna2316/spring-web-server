@@ -30,14 +30,14 @@ public class UserService {
   }
 
   @Transactional
-  public User join(String username, Email email, String password) {
-    checkArgument(isNotEmpty(password), "password must be provided");
+  public User join(String name, Email email, String password) {
+    checkArgument(isNotEmpty(password), "password must be provided.");
     checkArgument(
       password.length() >= 4 && password.length() <= 15,
       "password length must be between 4 and 15 characters."
     );
 
-    User user = new User(username, email, passwordEncoder.encode(password));
+    User user = new User(name, email, passwordEncoder.encode(password));
     return insert(user);
   }
 
@@ -53,7 +53,6 @@ public class UserService {
     return user;
   }
 
-
   @Transactional(readOnly = true)
   public Optional<User> findById(Id<User, Long> userId) {
     checkNotNull(userId, "userId must be provided.");
@@ -63,7 +62,7 @@ public class UserService {
 
   @Transactional(readOnly = true)
   public Optional<User> findByEmail(Email email) {
-    checkNotNull(email, "email must be provided");
+    checkNotNull(email, "email must be provided.");
 
     return userRepository.findByEmail(email);
   }

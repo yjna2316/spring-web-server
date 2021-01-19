@@ -24,7 +24,7 @@ public class JdbcUserRepository implements UserRepository {
   private final JdbcTemplate jdbcTemplate;
 
   /*
-   * JdbcTemplate 주입은 외부 어디서 언제 해주고,  DataSource 정보는 properties에서 어떻게 일어오는거지?
+   * JdbcTemplate 주입은 외부 어디서 언제 해주고,  DataSource 정보는 properties에서 어떻게 읽어오는거지?
    * => 스프링부트의 auto-configuration에 의해서
    *  https://dzone.com/articles/how-springboot-autoconfiguration-magic-works
    **/

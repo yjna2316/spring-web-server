@@ -27,22 +27,27 @@ class PostServiceTest {
 
   private final Logger log = LoggerFactory.getLogger(getClass());
 
-  @Autowired
-  private PostService postService;
+  @Autowired private PostService postService;
+
+  private Id<Post, Long> postId;
+
+  private Id<User, Long> writerId;
 
   private Id<User, Long> userId;
 
   @BeforeAll
   void setUp() {
-    userId = Id.of(User.class, 1L);
+    postId = Id.of(Post.class, 1L);
+    writerId = Id.of(User.class, 1L);
+    userId = Id.of(User.class, 2L);
   }
 
   @Test
   @Order(1)
   void 포스트를_작성한다() {
-    Writer writer = new Writer(new Email("test00@gmail.com"));
+    Writer writer = new Writer(new Email("test00@gmail.com"), "test");
     String contents = randomAlphabetic(40);
-    Post post = postService.write(new Post(userId, writer, contents));
+    Post post = postService.write(new Post(writerId, writer, contents));
     assertThat(post, is(notNullValue()));
     assertThat(post.getSeq(), is(notNullValue()));
     assertThat(post.getContents(), is(contents));
@@ -52,7 +57,7 @@ class PostServiceTest {
   @Test
   @Order(2)
   void 포스트를_수정한다() {
-    Post post = postService.findById(Id.of(Post.class, 1L)).orElse(null);
+    Post post = postService.findById(userId, postId, writerId).orElse(null);
     assertThat(post, is(notNullValue()));
     String contents = randomAlphabetic(40);
     post.modify(contents);
@@ -64,9 +69,42 @@ class PostServiceTest {
   @Test
   @Order(3)
   void 포스트_목록을_조회한다() {
-    List<Post> posts = postService.findAll(userId);
+    List<Post> posts = postService.findAll(userId, writerId, 0, 20);
     assertThat(posts, is(notNullValue()));
     assertThat(posts.size(), is(4));
   }
 
+  @Test
+  @Order(4)
+  void 포스트를_처음으로_좋아요_한다() {
+    Post post;
+
+    post = postService.findById(userId, postId, writerId).orElse(null);
+    assertThat(post, is(notNullValue()));
+    assertThat(post.isLikesOfMe(), is(false));
+
+    int beforeLikes = post.getLikes();
+
+    post = postService.like(userId, postId, writerId).orElse(null);
+    assertThat(post, is(notNullValue()));
+    assertThat(post.isLikesOfMe(), is(true));
+    assertThat(post.getLikes(), is(beforeLikes + 1));
+  }
+
+  @Test
+  @Order(5)
+  void 포스트를_중복으로_좋아할수없다() {
+    Post post;
+
+    post = postService.findById(userId, postId, writerId).orElse(null);
+    assertThat(post, is(notNullValue()));
+    assertThat(post.isLikesOfMe(), is(true));
+
+    int beforeLikes = post.getLikes();
+
+    post = postService.like(userId, postId, writerId).orElse(null);
+    assertThat(post, is(notNullValue()));
+    assertThat(post.isLikesOfMe(), is(true));
+    assertThat(post.getLikes(), is(beforeLikes));
+  }
 }

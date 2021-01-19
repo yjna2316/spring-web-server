@@ -13,8 +13,8 @@ public interface PostRepository {
 
   void update(Post post);
 
-  Optional<Post> findById(Id<Post, Long> postId);
+  Optional<Post> findById(Id<User, Long> userId, Id<Post, Long> postId, Id<User, Long> writerId);
 
-  List<Post> findAll(Id<User, Long> userId);
+  List<Post> findAll(Id<User, Long> userId, Id<User, Long> writerId, long offset, int limit);
 
 }

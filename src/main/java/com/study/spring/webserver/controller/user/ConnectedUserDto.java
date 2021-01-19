@@ -2,6 +2,7 @@ package com.study.spring.webserver.controller.user;
 
 import com.study.spring.webserver.model.user.ConnectedUser;
 import com.study.spring.webserver.model.user.Email;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -10,12 +11,16 @@ import java.time.LocalDateTime;
 import static org.springframework.beans.BeanUtils.copyProperties;
 
 public class ConnectedUserDto {
+  @ApiModelProperty(value = "친구 PK", required = true)
   private Long seq;
 
-  private Email email;
-
+  @ApiModelProperty(value = "이름", required = true)
   private String name;
 
+  @ApiModelProperty(value = "이메일", required = true)
+  private Email email;
+
+  @ApiModelProperty(value = "승락일시", required = true)
   private LocalDateTime grantedAt;
 
   public ConnectedUserDto(ConnectedUser source) {

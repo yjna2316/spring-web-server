@@ -19,6 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <undertow.version>2.2.2.Final</undertow.version>
+        <springfox.swagger2.version>2.9.2</springfox.swagger2.version>
         <java.jwt.version>3.11.0</java.jwt.version>
         <guava.version>30.0-jre</guava.version>
         <h2.version>1.4.199</h2.version>
@@ -46,7 +47,7 @@
             <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
 
-        <!--@ConfigurationProperties 어노테이션을 통해 properties 키값을 자동 바인딩하기 위함-->
+        <!--@ConfigurationProperties 어노테이션을 통해 properties 키값을 자동 바인딩할 때 필요-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -88,6 +89,18 @@
             <groupId>io.undertow</groupId>
             <artifactId>undertow-servlet</artifactId>
             <version>${undertow.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox.swagger2.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox.swagger2.version}</version>
         </dependency>
 
         <dependency>

@@ -5,6 +5,8 @@ import com.study.spring.webserver.error.UnauthorizedException;
 import com.study.spring.webserver.security.AuthenticationRequest;
 import com.study.spring.webserver.security.AuthenticationResult;
 import com.study.spring.webserver.security.JwtAuthenticationToken;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -24,6 +26,7 @@ import static com.study.spring.webserver.controller.ApiResult.OK;
  */
 @RestController
 @RequestMapping("api/auth")
+@Api(tags = "인증 APIs")
 public class AuthenticationRestController {
 
   private final AuthenticationManager authenticationManager;
@@ -33,6 +36,7 @@ public class AuthenticationRestController {
   }
 
   @PostMapping
+  @ApiOperation(value = "사용자 로그인 (API 토큰 필요없음)")
   public ApiResult<AuthenticationResultDto> authentication(@RequestBody AuthenticationRequest authRequest) throws UnauthorizedException {
     try {
       // HTTP 요청에서 인증정보(사용자 ID, 비밀번호)를 추출해서 JwtAuthenticationToken을(Authentication 인터페이스 구현체) 생성한다.
