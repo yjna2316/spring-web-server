@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: social push server
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    cache-duration: PT1H
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    platform: h2
+    driver-class-name: org.h2.Driver
+    url: "jdbc:h2:mem:web_server_push;MODE=MYSQL;DB_CLOSE_DELAY=-1"
+    username: sa
+    password:
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+      pool-name: H2_DB
+  kafka:
+    topic:
+      subscription-request: v1.subscription.request
+      comment-created: v1.event.comment-created
+      user-joined: v1.event.user-joined
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: push3
+      auto-offset-reset: latest
+    producer:
+      bootstrap-servers: localhost:9092
+server:
+  port: 8081
+webpush:
+  publicKey: BFJsnkDcKmsymlt5ZVUlIrGtqUxKVEiZ0iBRV3NKCFHrizInoT9FuA8MYESQVzbrTx4njj7lC3Iiz7K41dKUwGE
+  privateKey: K0IOiuODucZ4Tu8WprpXVKwiPBvYYLe4cle4ZLdhPVY
